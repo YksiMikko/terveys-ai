@@ -131,7 +131,7 @@ def analysoi_oireet(kayttajan_viesti, malli, piirteet, status_placeholder):
         if not bearer_token: return "Virhe: Ei voitu todentautua WHO:n palveluun."
 
         status_placeholder.text("2/5: Tunnistetaan oireita viestistä Geminin avulla...")
-        gemini_tunnistus = genai.GenerativeModel('gemini-1.5-flash')
+        gemini_tunnistus = genai.GenerativeModel('gemini-2.5-flash')
         prompt_tunnistus = f"""Analyze the following text and extract the medical symptoms. IMPORTANT: Return ONLY a comma-separated list of the symptoms in ENGLISH and in lowercase. Example: "I have a fever and a bad headache." -> "fever,headache". Text: "{kayttajan_viesti}" """
         vastaus = gemini_tunnistus.generate_content(prompt_tunnistus)
         tunnistetut_oireet_en = [o.strip().lower() for o in vastaus.text.strip().split(',') if o.strip()]
@@ -151,7 +151,7 @@ def analysoi_oireet(kayttajan_viesti, malli, piirteet, status_placeholder):
         status_placeholder.text("5/5: Kootaan lopullinen vastaus Geminin avulla...")
         who_teksti_en = "\n".join([f"- {t['otsikko']} (Code: {t['koodi']}): {t['määritelmä']}" for t in who_tiedot if t['löytyi']])
         prompt_lopputulos = f"""You are an empathetic AI health assistant. Synthesize the technical data below into a clear, helpful response IN FINNISH. IMPORTANT: ALWAYS remind the user that you are an AI, NOT a doctor, and they should consult a professional for serious symptoms. Technical data: - User's message: "{kayttajan_viesti}" - Symptoms identified (English): {', '.join(tunnistetut_oireet_en)} - ML model severity assessment: "{vakavuus_teksti}" - WHO information (English): {who_teksti_en}"""
-        gemini_koonti = genai.GenerativeModel('gemini-1.5-flash')
+        gemini_koonti = genai.GenerativeModel('gemini-2.5-flash')
         lopullinen_vastaus = gemini_koonti.generate_content(prompt_lopputulos)
         status_placeholder.empty()
         return lopullinen_vastaus.text
@@ -176,4 +176,5 @@ if st.button("Analysoi oireet"):
             st.markdown("### Analyysin tulokset:")
             st.markdown(tulos)
     else:
+
         st.warning("Syötä oireesi ennen analysointia.")
